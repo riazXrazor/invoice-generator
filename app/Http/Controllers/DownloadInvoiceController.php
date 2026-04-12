@@ -11,7 +11,7 @@ class DownloadInvoiceController extends Controller
     {
         $invoice->load(['client', 'items.product']);
         $company = \App\Models\CompanyDetail::first();
-        $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $invoice, '' => $company]);
+        $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $invoice, 'company' => $company]);
 
         // DOMPDF struggles with large tables sometimes or weird layouts, so we'll use stream for testing.
         return $pdf->stream('invoice-' . str_replace('/', '-', $invoice->invoice_no) . '.pdf');

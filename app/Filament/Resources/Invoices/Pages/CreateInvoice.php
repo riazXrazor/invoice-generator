@@ -9,8 +9,8 @@ class CreateInvoice extends CreateRecord
 {
     protected static string $resource = InvoiceResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return route('invoice.download', $this->record);
-    }
+    // protected function getRedirectUrl(): string
+    // {
+    //     return route('invoice.download', $this->record);
+    // }
 }
