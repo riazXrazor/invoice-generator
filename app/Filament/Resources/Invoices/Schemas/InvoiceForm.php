@@ -26,9 +26,9 @@ class InvoiceForm
                             ->relationship('client', 'name')
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get)),
+                            ->afterStateUpdated(fn(Set $set, Get $get) => self::updateTotals($set, $get)),
                         TextInput::make('invoice_no')
-                            ->default(fn () => 'UFP/'.str_pad(\App\Models\Invoice::count()+1, 3, '0', STR_PAD_LEFT).'/25-26')
+                            ->default(fn() => \App\Models\CompanyDetail::first()->invoice_prefix . '/' . str_pad(\App\Models\Invoice::count() + 1, 3, '0', STR_PAD_LEFT) . '/' . ((date('y')) . '-' . (date('y') + 1)))
                             ->required()
                             ->unique(ignoreRecord: true),
                         DatePicker::make('invoice_date')
@@ -43,7 +43,7 @@ class InvoiceForm
                             ->relationship()
                             ->columns(4)
                             ->live()
-                            ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get))
+                            ->afterStateUpdated(fn(Set $set, Get $get) => self::updateTotals($set, $get))
                             ->schema([
                                 Select::make('product_id')
                                     ->relationship('product', 'description')
@@ -103,7 +103,7 @@ class InvoiceForm
     {
         $clientId = $get('client_id');
         $items = $get('items');
-        
+
         $subtotal = 0;
         $taxAmount = 0;
 

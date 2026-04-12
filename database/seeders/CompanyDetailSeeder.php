@@ -26,6 +26,7 @@ class CompanyDetailSeeder extends Seeder
             'bank_detail_heading' => 'Company\'s Bank Detail: KUNDARALI BRANCH, SOUTH 24 PARGANAS -743302.',
             'declaration' => "Declare that this invoice shows the actual price of the\nGoods described and that all particular are true & perfect.\nGoods once sold not be taken back.",
             'jurisdiction' => 'SUBJECT TO BARUIPUR JURISDICTION',
+            'invoice_prefix' => 'UFP',
         ]);
     }
 }
