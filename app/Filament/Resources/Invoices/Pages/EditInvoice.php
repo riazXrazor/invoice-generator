@@ -18,7 +18,7 @@ class EditInvoice extends EditRecord
                 ->label('Print')
                 ->icon('heroicon-o-printer')
                 ->color('success')
-                ->url(fn ($record) => route('invoice.preview', ['invoice' => $record, 'print' => 1]))
+                ->url(fn ($record) => route('invoice.print', $record))
                 ->openUrlInNewTab(),
             DeleteAction::make(),
         ];
