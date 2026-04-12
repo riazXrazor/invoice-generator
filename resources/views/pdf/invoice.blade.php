@@ -28,7 +28,6 @@
     </style>
 </head>
 <body>
-
 <table class="main-table">
     <tbody>
         <!-- First Block: Company Info & Invoice Info -->
@@ -37,12 +36,12 @@
                 <table style="width: 100%; border-collapse: collapse; border: none;">
                     <tr>
                         <td rowspan="2" style="width: 50%; border: none; border-right: 1px solid #000; padding: 10px;">
-                            <div class="company-name">UNIQUE FOOD PRODUCTS</div>
-                            <div>CHAKARBARIA, KUNDRALI, BARUIPUR, 24 PG(S),</div>
-                            <div>.PIN-746310.</div>
-                            <div>WEST BENGAL</div>
-                            <div>Contact no :- </div>
-                            <div class="font-bold">GSTIN/UID- 19ACNPL1586D1ZD</div>
+                            <div class="company-name">{{ $company->company_name }}</div>
+                            <div>{{ $company->address_line_1 }}</div>
+                            <div>{{ $company->address_line_2 }}</div>
+                            <div>{{ $company->state }}</div>
+                            <div>Contact no :- {{ $company->contact_no }}</div>
+                            <div class="font-bold">GSTIN/UID- {{ $company->gstin }}</div>
                         </td>
                         <td style="width: 25%; border: none; border-right: 1px solid #000; border-bottom: 1px solid #000; padding: 5px;vertical-align: top;">
                             Invoice no-{{ $invoice->invoice_no }}
@@ -126,7 +125,7 @@
         @endforeach
 
         @php
-            $isWestBengal = strtoupper(trim($invoice->client->state)) === 'WEST BENGAL';
+            $isWestBengal = strtoupper(trim($invoice->client->state)) === strtoupper(trim($company->state));
             $cgst = $sgst = $igst = 0;
             if ($isWestBengal) {
                 $cgst = $invoice->tax_amount / 2;
@@ -209,13 +208,13 @@
         <!-- Bank Details and Declaration -->
         <tr>
             <td colspan="7" style="padding: 10px;padding-bottom: 0;padding-right: 0;">
-                <div style="font-weight: bold;">Company's Bank Detail: KUNDARALI BRANCH, SOUTH 24 PARGANAS -743302.</div>
+                <div style="font-weight: bold;">{{ $company->bank_detail_heading }}</div>
                 <table style="width: 60%; border: none; font-size: 13px; margin-top: 5px;">
-                    <tr><td style="border: none; padding: 1px 0; width: 100px;">Bank Name</td><td style="border: none; padding: 1px 0;">: UNION BANK</td></tr>
-                    <tr><td style="border: none; padding: 1px 0;">A/C No</td><td style="border: none; padding: 1px 0;">: 046113100000690</td></tr>
+                    <tr><td style="border: none; padding: 1px 0; width: 100px;">Bank Name</td><td style="border: none; padding: 1px 0;">: {{ $company->bank_name }}</td></tr>
+                    <tr><td style="border: none; padding: 1px 0;">A/C No</td><td style="border: none; padding: 1px 0;">: {{ $company->bank_account_no }}</td></tr>
                     <tr><td colspan="2" style="border: none; padding: 5px 0;"></td></tr>
-                    <tr><td style="border: none; padding: 1px 0;">IFS Code</td><td style="border: none; padding: 1px 0;">: UBIN0804614</td></tr>
-                    <tr><td style="border: none; padding: 1px 0;">Branch :</td><td style="border: none; padding: 1px 0;">: KUNDARALI BRANCH</td></tr>
+                    <tr><td style="border: none; padding: 1px 0;">IFS Code</td><td style="border: none; padding: 1px 0;">: {{ $company->bank_ifs_code }}</td></tr>
+                    <tr><td style="border: none; padding: 1px 0;">Branch :</td><td style="border: none; padding: 1px 0;">: {{ $company->bank_branch }}</td></tr>
                 </table>
 
                 <div style="margin-top: 15px; width: 100%;">
@@ -223,9 +222,7 @@
                         <tr>
                             <td style="border: none; padding: 0; width: 60%; vertical-align: top;">
                                 <div style="font-weight: bold; margin-bottom: 3px;">Declaration :</div>
-                                <div>Declare that this invoice shows the actual price of the</div>
-                                <div>Goods described and that all particular are true & perfect.</div>
-                                <div>Goods once sold not be taken back.</div>
+                                <div>{!! nl2br(e($company->declaration)) !!}</div>
                             </td>
                             <td style="border: none;padding: 0;width: 40%;vertical-align: bottom;text-align: right;border: 1px solid #000;border-bottom: 0;border-right: 0;">
                                 <div style="">
@@ -242,7 +239,7 @@
 </table>
 
 <div style="text-align: center; margin-top: 20px; font-weight: bold;">
-    SUBJECT TO BARUIPUR JURISDICTION
+    {{ $company->jurisdiction }}
 </div>
 
 </body>
