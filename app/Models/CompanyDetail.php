@@ -20,5 +20,6 @@ class CompanyDetail extends Model
         'bank_detail_heading',
         'declaration',
         'jurisdiction',
+        'invoice_template',
     ];
 }

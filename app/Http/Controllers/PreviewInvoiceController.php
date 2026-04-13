@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\CompanyDetail;
 use App\Models\Invoice;
 
 class PreviewInvoiceController extends Controller
@@ -10,7 +10,9 @@ class PreviewInvoiceController extends Controller
     public function __invoke(Invoice $invoice)
     {
         $invoice->load(['client', 'items.product']);
-        $company = \App\Models\CompanyDetail::first();
-        return view('pdf.invoice', ['invoice' => $invoice, 'company' => $company]);
+        $company = CompanyDetail::first();
+        $template = $company->invoice_template ?? 'invoice_v1';
+
+        return view('pdf.'.$template, ['invoice' => $invoice, 'company' => $company]);
     }
 }

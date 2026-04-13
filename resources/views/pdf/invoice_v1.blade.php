@@ -151,16 +151,31 @@
                                     <strong>Shipping Address:-</strong>
                                 </div>
 
-                                <div style="text-align: center; margin-top: 30px;">-DO-</div>
-                                <br><br>
-                                <div style="padding: 0 5px;">GSTIN/UTN:- </div>
-                                <table
-                                    style="width: 100%; border: none; font-size: 13px; margin-top: 5px; padding: 0 5px;">
-                                    <tr>
-                                        <td style="border: none; padding: 0;">State: </td>
-                                        <td style="border: none; padding: 0; text-align: right;">State Code: </td>
-                                    </tr>
-                                </table>
+                                @if($invoice->has_different_shipping_address)
+                                    <div style="padding: 5px;">
+                                        <div style="margin-bottom: 5px; font-size: 14px;"><strong>{{ strtoupper($invoice->shipping_name) }}</strong></div>
+                                        <div>{!! nl2br(e($invoice->shipping_address)) !!}</div>
+                                        <br>
+                                        <div><strong>GSTIN/UTN:- {{ $invoice->shipping_gstin }}</strong></div>
+                                        <table style="width: 100%; border: none; font-size: 13px; margin-top: 5px;">
+                                            <tr>
+                                                <td style="border: none; padding: 0;">State: {{ strtoupper($invoice->shipping_state) }}</td>
+                                                <td style="border: none; padding: 0; text-align: right;">State Code: {{ $invoice->shipping_state_code }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div style="text-align: center; margin-top: 30px;">-DO-</div>
+                                    <br><br>
+                                    <div style="padding: 0 5px;">GSTIN/UTN:- </div>
+                                    <table
+                                        style="width: 100%; border: none; font-size: 13px; margin-top: 5px; padding: 0 5px;">
+                                        <tr>
+                                            <td style="border: none; padding: 0;">State: </td>
+                                            <td style="border: none; padding: 0; text-align: right;">State Code: </td>
+                                        </tr>
+                                    </table>
+                                @endif
                             </td>
                         </tr>
                     </table>

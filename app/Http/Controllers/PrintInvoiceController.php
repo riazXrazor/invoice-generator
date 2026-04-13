@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyDetail;
 use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -10,12 +11,13 @@ class PrintInvoiceController extends Controller
     public function __invoke(Invoice $invoice)
     {
         $invoice->load(['client', 'items.product']);
-        $company = \App\Models\CompanyDetail::first();
-        
+        $company = CompanyDetail::first();
+
         // Generate the DOMPDF binary with JS enabled for auto-print
+        $template = $company->invoice_template ?? 'invoice_v1';
         $pdf = Pdf::setOptions(['isJavascriptEnabled' => true])
-            ->loadView('pdf.invoice', ['invoice' => $invoice, 'company' => $company]);
-            
+            ->loadView('pdf.'.$template, ['invoice' => $invoice, 'company' => $company]);
+
         $base64 = base64_encode($pdf->output());
 
         // Return a raw HTML wrapper around a base64 Data URI

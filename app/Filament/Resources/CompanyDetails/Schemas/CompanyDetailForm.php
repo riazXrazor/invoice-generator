@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\CompanyDetails\Schemas;
 
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CompanyDetailForm
@@ -53,6 +54,14 @@ class CompanyDetailForm
                 TextInput::make('invoice_prefix')
                     ->required()
                     ->default('UFP'),
+                Select::make('invoice_template')
+                    ->label('Invoice Template')
+                    ->options([
+                        'invoice_v1' => 'Invoice Template V1',
+                        'invoice_v2' => 'Invoice Template V2',
+                    ])
+                    ->default('invoice_v1')
+                    ->required(),
             ]);
     }
 }

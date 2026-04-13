@@ -143,14 +143,27 @@
     </div>
 
     <div class="flex mb-2">
-        <div class="col-half">
+        <div class="col-half" style="width: 40%;">
             <div><strong>Buyer:</strong></div>
-            <div>{{ $invoice->client->name }}</div>
+            <div>{{ strtoupper($invoice->client->name) }}</div>
             <div>{!! nl2br(e($invoice->client->address)) !!}</div>
             <div><strong>GSTIN:</strong> {{ $invoice->client->gstin ?? 'URP' }}</div>
-            <div><strong>State:</strong> {{ $invoice->client->state }} ({{ $invoice->client->state_code }})</div>
+            <div><strong>State:</strong> {{ strtoupper($invoice->client->state) }} ({{ $invoice->client->state_code }})
+            </div>
         </div>
-        <div class="col-half-right">
+        <div class="col-half" style="width: 35%;">
+            <div><strong>Shipping Address:</strong></div>
+            @if($invoice->has_different_shipping_address)
+                <div>{{ strtoupper($invoice->shipping_name) }}</div>
+                <div>{!! nl2br(e($invoice->shipping_address)) !!}</div>
+                <div><strong>GSTIN:</strong> {{ $invoice->shipping_gstin ?? 'URP' }}</div>
+                <div><strong>State:</strong> {{ strtoupper($invoice->shipping_state) }}
+                    ({{ $invoice->shipping_state_code }})</div>
+            @else
+                <div style="margin-top: 20px;">-DO-</div>
+            @endif
+        </div>
+        <div class="col-half-right" style="width: 30%;">
             <div><strong>Invoice No:</strong> {{ $invoice->invoice_no }}</div>
             <div><strong>Date:</strong> {{ $invoice->invoice_date->format('d-m-Y') }}</div>
             @if($invoice->challan_no)
@@ -200,26 +213,26 @@
             @endphp
 
             <tr>
-                <td colspan="5" style="text-align:right;"><strong>Total Amount before Tax</strong></td>
+                <td colspan="6" style="text-align:right;"><strong>Total Amount before Tax</strong></td>
                 <td style="text-align:right;"><strong>{{ number_format($invoice->subtotal, 2) }}</strong></td>
             </tr>
 
             @if($isWestBengal)
                 <tr>
-                    <td colspan="5" style="text-align:right;">Add : CGST @
+                    <td colspan="6" style="text-align:right;">Add : CGST @
                         {{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%
                     </td>
                     <td style="text-align:right;">{{ number_format($cgst, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="5" style="text-align:right;">Add : SGST @
+                    <td colspan="6" style="text-align:right;">Add : SGST @
                         {{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%
                     </td>
                     <td style="text-align:right;">{{ number_format($sgst, 2) }}</td>
                 </tr>
             @else
                 <tr>
-                    <td colspan="5" style="text-align:right;">Add : IGST @
+                    <td colspan="6" style="text-align:right;">Add : IGST @
                         {{ $invoice->items->first()?->product?->tax_rate ?? 0 }}%
                     </td>
                     <td style="text-align:right;">{{ number_format($igst, 2) }}</td>
@@ -227,7 +240,7 @@
             @endif
 
             <tr>
-                <td colspan="5" style="text-align:right;"><strong>Grand Total (Rounded)</strong></td>
+                <td colspan="6" style="text-align:right;"><strong>Grand Total (Rounded)</strong></td>
                 <td style="text-align:right;"><strong>{{ number_format(round($invoice->grand_total), 2) }}</strong></td>
             </tr>
         </tbody>

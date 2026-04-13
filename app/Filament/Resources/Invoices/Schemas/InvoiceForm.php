@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources\Invoices\Schemas;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
+use App\Models\Client;
+use App\Models\CompanyDetail;
+use App\Models\Invoice;
+use App\Models\Product;
 use Filament\Forms\Components\DatePicker;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use App\Models\Product;
-use App\Models\Client;
+use Filament\Schemas\Schema;
 
 class InvoiceForm
 {
@@ -26,9 +30,9 @@ class InvoiceForm
                             ->relationship('client', 'name')
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn(Set $set, Get $get) => self::updateTotals($set, $get)),
+                            ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get)),
                         TextInput::make('invoice_no')
-                            ->default(fn() => \App\Models\CompanyDetail::first()->invoice_prefix . '/' . str_pad(\App\Models\Invoice::count() + 1, 3, '0', STR_PAD_LEFT) . '/' . ((date('y')) . '-' . (date('y') + 1)))
+                            ->default(fn () => CompanyDetail::first()->invoice_prefix.'/'.str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT).'/'.((date('y')).'-'.(date('y') + 1)))
                             ->required()
                             ->unique(ignoreRecord: true),
                         DatePicker::make('invoice_date')
@@ -36,6 +40,27 @@ class InvoiceForm
                             ->required(),
                         TextInput::make('challan_no'),
                         TextInput::make('dispatched_through'),
+                        Section::make('Shipping Details')
+                            ->schema([
+                                Toggle::make('has_different_shipping_address')
+                                    ->label('Shipping address is different from buyer')
+                                    ->live(),
+                                TextInput::make('shipping_name')
+                                    ->label('Shipping Name')
+                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
+                                Textarea::make('shipping_address')
+                                    ->label('Shipping Address')
+                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
+                                TextInput::make('shipping_gstin')
+                                    ->label('Shipping GSTIN/UTN')
+                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
+                                TextInput::make('shipping_state')
+                                    ->label('Shipping State')
+                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
+                                TextInput::make('shipping_state_code')
+                                    ->label('Shipping State Code')
+                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
+                            ])->columnSpanFull(),
                     ]),
                 Section::make('Items')
                     ->schema([
@@ -43,7 +68,7 @@ class InvoiceForm
                             ->relationship()
                             ->columns(4)
                             ->live()
-                            ->afterStateUpdated(fn(Set $set, Get $get) => self::updateTotals($set, $get))
+                            ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get))
                             ->schema([
                                 Select::make('product_id')
                                     ->relationship('product', 'description')
@@ -81,7 +106,7 @@ class InvoiceForm
                                     ->numeric()
                                     ->required()
                                     ->readOnly(),
-                            ])
+                            ]),
                     ]),
                 Section::make('Totals')
                     ->columns(3)
@@ -95,7 +120,7 @@ class InvoiceForm
                         TextInput::make('grand_total')
                             ->numeric()
                             ->readOnly(),
-                    ])
+                    ]),
             ]);
     }
 
