@@ -15,7 +15,7 @@ class ClientsTable
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('name')->searchable(),
                 \Filament\Tables\Columns\TextColumn::make('gstin')->searchable(),
-                \Filament\Tables\Columns\TextColumn::make('state')->searchable(),
+                \Filament\Tables\Columns\TextColumn::make('stateModel.name')->label('State')->searchable(),
             ])
             ->filters([
                 //

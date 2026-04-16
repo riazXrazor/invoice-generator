@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Clients\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -12,10 +13,13 @@ class ClientForm
     {
         return $schema
             ->components([
-                TextInput::make('name')->required(),
-                TextInput::make('gstin')->label('GSTIN'),
-                TextInput::make('state'),
-                TextInput::make('state_code')->label('State Code')->numeric(),
+                TextInput::make('name')->required()->columnSpanFull(),
+                Select::make('state_code')
+                    ->label('State')
+                    ->options(\App\Models\State::all()->pluck('name_with_code', 'code'))
+                    ->required()
+                    ->searchable()->columnSpanFull(),
+                TextInput::make('gstin')->label('GSTIN / UTN / PAN')->columnSpanFull(),
                 Textarea::make('address')->required()->columnSpanFull(),
             ]);
     }

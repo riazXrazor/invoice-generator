@@ -10,7 +10,7 @@ class Invoice extends Model
         'client_id', 'invoice_no', 'invoice_date', 'challan_no',
         'dispatched_through', 'subtotal', 'tax_amount', 'grand_total',
         'has_different_shipping_address', 'shipping_name', 'shipping_address',
-        'shipping_gstin', 'shipping_state', 'shipping_state_code',
+        'shipping_gstin', 'shipping_state_code',
     ];
 
     protected $casts = [
@@ -20,6 +20,16 @@ class Invoice extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function shippingStateModel()
+    {
+        return $this->belongsTo(State::class, 'shipping_state_code', 'code');
+    }
+
+    public function getShippingStateAttribute()
+    {
+        return $this->shippingStateModel?->name ?? '';
     }
 
     public function items()

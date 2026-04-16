@@ -21,6 +21,11 @@ return new class extends Migration
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('tax_amount', 15, 2)->default(0);
             $table->decimal('grand_total', 15, 2)->default(0);
+            $table->boolean('has_different_shipping_address')->default(false);
+            $table->string('shipping_name')->nullable();
+            $table->text('shipping_address')->nullable();
+            $table->string('shipping_gstin')->nullable();
+            $table->string('shipping_state_code')->nullable();
             $table->timestamps();
         });
     }

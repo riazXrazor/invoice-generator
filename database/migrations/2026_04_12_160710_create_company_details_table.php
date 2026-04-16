@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('company_name')->nullable();
             $table->string('address_line_1')->nullable();
             $table->string('address_line_2')->nullable();
-            $table->string('state')->nullable();
+            $table->string('state_code')->nullable();
             $table->string('contact_no')->nullable();
             $table->string('gstin')->nullable();
             $table->string('bank_name')->nullable();
@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->text('declaration')->nullable();
             $table->string('jurisdiction')->nullable();
             $table->string('invoice_prefix')->nullable();
+            $table->string('invoice_template')->default('invoice_v1');
             $table->timestamps();
         });
     }

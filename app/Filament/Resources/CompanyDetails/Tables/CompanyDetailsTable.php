@@ -20,7 +20,7 @@ class CompanyDetailsTable
                     ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('address_line_2')
                     ->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('state')
+                TextColumn::make('stateModel.name')->label('State')
                     ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('contact_no')
                     ->searchable()->toggleable(isToggledHiddenByDefault: true),

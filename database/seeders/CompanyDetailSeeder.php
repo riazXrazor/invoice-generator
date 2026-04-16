@@ -16,7 +16,7 @@ class CompanyDetailSeeder extends Seeder
             'company_name' => 'UNIQUE FOOD PRODUCTS',
             'address_line_1' => 'CHAKARBARIA, KUNDRALI, BARUIPUR, 24 PG(S),',
             'address_line_2' => '.PIN-746310.',
-            'state' => 'WEST BENGAL',
+            'state_code' => '19',
             'contact_no' => null,
             'gstin' => '19ACNPL1586D1ZD',
             'bank_name' => 'UNION BANK',

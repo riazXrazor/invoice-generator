@@ -22,9 +22,12 @@ class CompanyDetailForm
                 TextInput::make('address_line_2')
                     ->required()
                     ->default('.PIN-746310.'),
-                TextInput::make('state')
+                Select::make('state_code')
+                    ->label('State')
+                    ->options(\App\Models\State::all()->pluck('name_with_code', 'code'))
                     ->required()
-                    ->default('WEST BENGAL'),
+                    ->searchable()
+                    ->default('19'),
                 TextInput::make('contact_no'),
                 TextInput::make('gstin')
                     ->required()

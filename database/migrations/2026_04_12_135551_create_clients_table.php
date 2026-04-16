@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('address');
             $table->string('gstin')->nullable();
-            $table->string('state')->nullable();
             $table->string('state_code')->nullable();
             $table->timestamps();
         });

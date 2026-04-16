@@ -54,12 +54,11 @@ class InvoiceForm
                                 TextInput::make('shipping_gstin')
                                     ->label('Shipping GSTIN/UTN')
                                     ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
-                                TextInput::make('shipping_state')
+                                Select::make('shipping_state_code')
                                     ->label('Shipping State')
-                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
-                                TextInput::make('shipping_state_code')
-                                    ->label('Shipping State Code')
-                                    ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
+                                    ->options(\App\Models\State::all()->pluck('name_with_code', 'code'))
+                                    ->searchable()
+                                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('has_different_shipping_address')),
                             ])->columnSpanFull(),
                     ]),
                 Section::make('Items')

@@ -10,7 +10,7 @@ class CompanyDetail extends Model
         'company_name',
         'address_line_1',
         'address_line_2',
-        'state',
+        'state_code',
         'contact_no',
         'gstin',
         'bank_name',
@@ -22,4 +22,14 @@ class CompanyDetail extends Model
         'jurisdiction',
         'invoice_template',
     ];
+
+    public function stateModel()
+    {
+        return $this->belongsTo(State::class, 'state_code', 'code');
+    }
+
+    public function getStateAttribute()
+    {
+        return $this->stateModel?->name ?? '';
+    }
 }

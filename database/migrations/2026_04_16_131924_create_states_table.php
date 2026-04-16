@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('company_details', function (Blueprint $table) {
-            $table->string('invoice_template')->default('invoice_v1')->after('invoice_prefix');
+        Schema::create('states', function (Blueprint $table) {
+            $table->id();
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('company_details', function (Blueprint $table) {
-            $table->dropColumn('invoice_template');
-        });
+        Schema::dropIfExists('states');
     }
 };
