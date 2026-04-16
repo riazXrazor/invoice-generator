@@ -79,12 +79,15 @@
             window.onload = function () {
                 window.print();
             };
-            window.onafterprint = function() {
+            window.onafterprint = function () {
                 window.close();
             };
         @endif
     </script>
 </head>
+@php
+    $isIntraState = ($invoice->shipping_state_code ?? $invoice->client->state_code) === $company->state_code;
+@endphp
 
 <body>
     <table class="main-table">
@@ -105,7 +108,7 @@
                             </td>
                             <td
                                 style="width: 25%; border: none; border-right: 1px solid #000; border-bottom: 1px solid #000; padding: 5px;vertical-align: top;">
-                                Invoice no-{{ $invoice->invoice_no }}
+                                Invoice No: {{ $invoice->invoice_no }}
                             </td>
                             <td
                                 style="width: 25%; border: none; border-bottom: 1px solid #000; padding: 5px;vertical-align: top;">
@@ -135,14 +138,21 @@
                                         {{ strtoupper($invoice->client->name) }}.</strong></div>
                                 <div>Adress- {!! nl2br(e($invoice->client->address)) !!}</div>
                                 <br><br>
-                                <div><strong>GSTIN/UTN:- {{ $invoice->client->gstin }}</strong></div>
-                                <br>
+                                @if(!$isIntraState)
+                                    <div><strong>GSTIN/UTN:- {{ $invoice->client->gstin }}</strong></div>
+                                    <br>
+                                @else
+                                    <div><strong>GSTIN/UTN/PAN NO:- {{ $invoice->client->gstin }}</strong></div>
+                                    <br>
+                                @endif
                                 <table style="width: 100%; border: none; font-size: 13px;">
                                     <tr>
                                         <td style="border: none; padding: 0;">State:
-                                            {{ strtoupper($invoice->client->state) }}</td>
+                                            {{ strtoupper($invoice->client->state) }}
+                                        </td>
                                         <td style="border: none; padding: 0; text-align: right;">State Code:
-                                            {{ $invoice->client->state_code }}</td>
+                                            {{ $invoice->client->state_code }}
+                                        </td>
                                     </tr>
                                 </table>
                             </td>
@@ -153,14 +163,20 @@
 
                                 @if($invoice->has_different_shipping_address)
                                     <div style="padding: 5px;">
-                                        <div style="margin-bottom: 5px; font-size: 14px;"><strong>{{ strtoupper($invoice->shipping_name) }}</strong></div>
+                                        <div style="margin-bottom: 5px; font-size: 14px;">
+                                            <strong>{{ strtoupper($invoice->shipping_name) }}</strong>
+                                        </div>
                                         <div>{!! nl2br(e($invoice->shipping_address)) !!}</div>
                                         <br>
                                         <div><strong>GSTIN/UTN:- {{ $invoice->shipping_gstin }}</strong></div>
                                         <table style="width: 100%; border: none; font-size: 13px; margin-top: 5px;">
                                             <tr>
-                                                <td style="border: none; padding: 0;">State: {{ strtoupper($invoice->shipping_state) }}</td>
-                                                <td style="border: none; padding: 0; text-align: right;">State Code: {{ $invoice->shipping_state_code }}</td>
+                                                <td style="border: none; padding: 0;">State:
+                                                    {{ strtoupper($invoice->shipping_state) }}
+                                                </td>
+                                                <td style="border: none; padding: 0; text-align: right;">State Code:
+                                                    {{ $invoice->shipping_state_code }}
+                                                </td>
                                             </tr>
                                         </table>
                                     </div>
@@ -183,14 +199,23 @@
             </tr>
 
             <!-- Table Headers -->
+
             <tr>
-                <th style="width:5%; text-align:center; font-weight:normal;">SL<br>No</th>
-                <th style="width:35%; text-align:center; font-weight:normal;">Description of Goods</th>
-                <th style="width:10%; text-align:center; font-weight:normal;">HSN Code</th>
-                <th style="width:8%; text-align:center; font-weight:normal;">Unit</th>
-                <th style="width:8%; text-align:center; font-weight:normal;">Qty</th>
-                <th style="width:14%; text-align:center; font-weight:normal;">Rate</th>
-                <th style="width:20%; text-align:center; font-weight:normal;">Amount</th>
+                <th style="width:5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    SL<br>No</th>
+                <th style="width:34.5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    Description of Goods
+                </th>
+                <th style="width:10.5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    HSN Code</th>
+                <th style="width:8%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    Unit</th>
+                <th style="width:8%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">Qty
+                </th>
+                <th style="width:14%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    Rate</th>
+                <th style="width:20%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    Amount</th>
             </tr>
 
             <!-- Items -->
@@ -207,14 +232,18 @@
             @endforeach
 
             @php
-                $isWestBengal = strtoupper(trim($invoice->client->state)) === strtoupper(trim($company->state));
+
                 $cgst = $sgst = $igst = 0;
-                if ($isWestBengal) {
+                if ($isIntraState) {
                     $cgst = $invoice->tax_amount / 2;
                     $sgst = $invoice->tax_amount / 2;
                 } else {
                     $igst = $invoice->tax_amount;
                 }
+
+                $grandTotalExact = $invoice->subtotal + $invoice->tax_amount;
+                $grandTotalRounded = round($grandTotalExact);
+                $roundOff = $grandTotalRounded - $grandTotalExact;
             @endphp
 
             <!-- Empty rows logic mapping -->
@@ -228,17 +257,30 @@
                 <td></td>
             </tr>
 
-            @if($isWestBengal)
+            <tr>
+                <td class="no-border-top no-border-bottom"></td>
+                <td class="no-border-top no-border-bottom"></td>
+                <td class="no-border-top no-border-bottom"></td>
+                <td class="no-border-top no-border-bottom"></td>
+                <td class="no-border-top no-border-bottom"></td>
+                <td style="border-top: 1px solid #000; border-bottom: none; border-top: none; padding-bottom:5px;">
+                    IGST @ {{ $invoice->items->first()?->product?->tax_rate ?? 0 }}%</td>
+                <td style="border-top: 1px solid #000; border-bottom: none; text-align:center;">
+                    {{ number_format($igst, 2) }}
+                </td>
+            </tr>
+            @if($isIntraState)
                 <tr>
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
-                    <td style="border-top: 1px solid #000; border-bottom: none; padding-bottom:5px;">
-                        CGST@<br>{{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%</td>
-                    <td style="border-top: 1px solid #000; border-bottom: none; text-align:center;">
-                        {{ number_format($cgst, 2) }}</td>
+                    <td style="border-bottom: none; border-top: none; padding-bottom:5px;">
+                        CGST @ {{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%</td>
+                    <td style="border-bottom: none; border-top: none; text-align:center;">
+                        {{ number_format($cgst, 2) }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="no-border-top no-border-bottom"></td>
@@ -247,20 +289,8 @@
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
                     <td style="border-bottom: none; border-top: none;">
-                        SGST@<br>{{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%</td>
+                        SGST @ {{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%</td>
                     <td style="border-bottom: none; border-top: none; text-align:center;">{{ number_format($sgst, 2) }}</td>
-                </tr>
-            @else
-                <tr>
-                    <td class="no-border-top no-border-bottom"></td>
-                    <td class="no-border-top no-border-bottom"></td>
-                    <td class="no-border-top no-border-bottom"></td>
-                    <td class="no-border-top no-border-bottom"></td>
-                    <td class="no-border-top no-border-bottom"></td>
-                    <td style="border-top: 1px solid #000; border-bottom: none;border-top: none; padding-bottom:5px;">
-                        IGST@<br>{{ $invoice->items->first()?->product?->tax_rate ?? 0 }}%</td>
-                    <td style="border-top: 1px solid #000; border-bottom: none; text-align:center;">
-                        {{ number_format($igst, 2) }}</td>
                 </tr>
             @endif
 
@@ -273,7 +303,8 @@
                 <td style="border-bottom: none; border-top: none; padding-top:15px; padding-bottom:15px;">Round off</td>
                 <td
                     style="border-bottom: none; border-top: none; text-align:center; padding-top:15px; padding-bottom:15px;">
-                    0.00</td>
+                    {{ number_format($roundOff, 2) }}
+                </td>
             </tr>
 
             <!-- Total Row -->

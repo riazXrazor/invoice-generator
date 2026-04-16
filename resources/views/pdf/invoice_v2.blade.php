@@ -133,6 +133,7 @@
 
     @php
         $company = \App\Models\CompanyDetail::first();
+        $isIntraState = ($invoice->shipping_state_code ?? $invoice->client->state_code) === $company->state_code;
     @endphp
 
     <div class="header text-center">
@@ -147,7 +148,11 @@
             <div><strong>Buyer:</strong></div>
             <div>{{ strtoupper($invoice->client->name) }}</div>
             <div>{!! nl2br(e($invoice->client->address)) !!}</div>
-            <div><strong>GSTIN:</strong> {{ $invoice->client->gstin ?? 'URP' }}</div>
+            @if(!$isIntraState)
+                <div><strong>GSTIN/UTN:- {{ $invoice->client->gstin ?? 'URP' }}</strong></div>
+            @else
+                <div><strong>GSTIN/UTN/PAN NO:- {{ $invoice->client->gstin ?? 'URP' }}</strong></div>
+            @endif
             <div><strong>State:</strong> {{ strtoupper($invoice->client->state) }} ({{ $invoice->client->state_code }})
             </div>
         </div>
@@ -184,8 +189,8 @@
                 <th style="width:10%;">HSN/SAC</th>
                 <th style="width:15%; text-align:center;">Unit</th>
                 <th style="width:15%; text-align:center;">Quantity</th>
-                <th style="width:15%; text-align:right;">Rate</th>
-                <th style="width:15%; text-align:right;">Amount</th>
+                <th style="width:15%; text-align:center;">Rate</th>
+                <th style="width:15%; text-align:center;">Amount</th>
             </tr>
         </thead>
         <tbody>
@@ -196,20 +201,23 @@
                     <td>{{ $item->product->hsn_code }}</td>
                     <td style="text-align:center;">{{ $item->product->unit }}</td>
                     <td style="text-align:center;">{{ (float) $item->quantity }}</td>
-                    <td style="text-align:right;">{{ number_format($item->rate, 2) }}</td>
+                    <td style="text-align:center;">{{ number_format($item->rate, 2) }}</td>
                     <td style="text-align:right;">{{ number_format($item->amount, 2) }}</td>
                 </tr>
             @endforeach
 
             @php
-                $isWestBengal = strtoupper(trim($invoice->client->state)) === strtoupper(trim($company->state));
                 $cgst = $sgst = $igst = 0;
-                if ($isWestBengal) {
+                if ($isIntraState) {
                     $cgst = $invoice->tax_amount / 2;
                     $sgst = $invoice->tax_amount / 2;
                 } else {
                     $igst = $invoice->tax_amount;
                 }
+
+                $grandTotalExact = $invoice->subtotal + $invoice->tax_amount;
+                $grandTotalRounded = round($grandTotalExact);
+                $roundOff = $grandTotalRounded - $grandTotalExact;
             @endphp
 
             <tr>
@@ -217,7 +225,13 @@
                 <td style="text-align:right;"><strong>{{ number_format($invoice->subtotal, 2) }}</strong></td>
             </tr>
 
-            @if($isWestBengal)
+            <tr>
+                <td colspan="6" style="text-align:right;">Add : IGST @
+                    {{ $invoice->items->first()?->product?->tax_rate ?? 0 }}%
+                </td>
+                <td style="text-align:right;">{{ number_format($igst, 2) }}</td>
+            </tr>
+            @if($isIntraState)
                 <tr>
                     <td colspan="6" style="text-align:right;">Add : CGST @
                         {{ $invoice->items->first()?->product?->tax_rate / 2 ?? 0 }}%
@@ -230,18 +244,16 @@
                     </td>
                     <td style="text-align:right;">{{ number_format($sgst, 2) }}</td>
                 </tr>
-            @else
-                <tr>
-                    <td colspan="6" style="text-align:right;">Add : IGST @
-                        {{ $invoice->items->first()?->product?->tax_rate ?? 0 }}%
-                    </td>
-                    <td style="text-align:right;">{{ number_format($igst, 2) }}</td>
-                </tr>
             @endif
 
             <tr>
+                <td colspan="6" style="text-align:right;">Round Off</td>
+                <td style="text-align:right;">{{ number_format($roundOff, 2) }}</td>
+            </tr>
+
+            <tr>
                 <td colspan="6" style="text-align:right;"><strong>Grand Total (Rounded)</strong></td>
-                <td style="text-align:right;"><strong>{{ number_format(round($invoice->grand_total), 2) }}</strong></td>
+                <td style="text-align:right;"><strong>{{ number_format($grandTotalRounded, 2) }}</strong></td>
             </tr>
         </tbody>
     </table>
