@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    image: riazxrazor/invoice_generator_app:latest
+    container_name: invoice_generator_app
+    restart: unless-stopped
+    ports:
+      - "9000:80"
+    environment:
+      - APP_ENV=homelab
+      - APP_DEBUG=false
+    volumes:
+      # Mount the .env file if it exists, otherwise it will use .env.example internally
+      - ./.env:/var/www/html/.env
+      
+      # Mount a dedicated directory for the SQLite database data.
+      # This provides an isolated folder simply named "database_data" at your project root,
+      # which you can easily back up without backing up the entire repo.
+      - ./database_data:/var/www/html/database_data
+      
+      # Mount the storage folder to persist uploaded files, cache, and logs
+      - ./storage/app:/var/www/html/storage/app
+      - ./storage/logs:/var/www/html/storage/logs

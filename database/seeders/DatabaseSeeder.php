@@ -17,10 +17,15 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Automatically create the admin user if it doesn't exist
+        $adminEmail = 'admin@admin.com';
+        if (!User::where('email', $adminEmail)->exists()) {
+            User::factory()->create([
+                'name' => 'Admin User',
+                'email' => $adminEmail,
+                'password' => bcrypt('unique@123'),
+            ]);
+        }
 
         $this->call(CompanyDetailSeeder::class);
     }
