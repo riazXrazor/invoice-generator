@@ -6,7 +6,10 @@ use App\Models\Client;
 use App\Models\CompanyDetail;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\State;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -32,18 +35,23 @@ class InvoiceForm
                                     ->relationship('client', 'name')
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(fn(Set $set, Get $get) => self::updateTotals($set, $get)),
+                                    ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get)),
                                 TextInput::make('invoice_no')
-                                    ->default(fn() => CompanyDetail::first()->invoice_prefix . '/' . str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT) . '/' . ((date('y')) . '-' . (date('y') + 1)))
+                                    ->default(fn () => CompanyDetail::first()->invoice_prefix.'/'.str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT).'/'.((date('y')).'-'.(date('y') + 1)))
                                     ->required()
                                     ->unique(ignoreRecord: true),
                                 DatePicker::make('invoice_date')
                                     ->default(now())
                                     ->required(),
                                 TextInput::make('challan_no'),
-                                TextInput::make('dispatched_through')
-                            ])
-                            ,
+                                TextInput::make('dispatched_through')->columnSpanFull(),
+                                Checkbox::make('cc_attach')
+                                    ->label('C.C. ATTACH')
+                                    ->live()->columnSpanFull(),
+                                TextInput::make('cc_phone')
+                                    ->label('Phone Number')
+                                    ->visible(fn (Get $get): bool => (bool) $get('cc_attach'))
+                            ]),
                             Section::make('Shipping Details')
                                 ->schema([
                                     Toggle::make('has_different_shipping_address')
@@ -51,47 +59,47 @@ class InvoiceForm
                                         ->live(),
                                     TextInput::make('shipping_name')
                                         ->label('Shipping Name')
-                                        ->visible(fn(Get $get): bool => $get('has_different_shipping_address')),
+                                        ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
                                     Textarea::make('shipping_address')
                                         ->label('Shipping Address')
-                                        ->visible(fn(Get $get): bool => $get('has_different_shipping_address')),
+                                        ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
                                     TextInput::make('shipping_gstin')
                                         ->label('Shipping GSTIN/UTN')
-                                        ->visible(fn(Get $get): bool => $get('has_different_shipping_address')),
+                                        ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
                                     Select::make('shipping_state_code')
                                         ->label('Shipping State')
-                                        ->options(\App\Models\State::all()->pluck('name_with_code', 'code'))
+                                        ->options(State::all()->pluck('name_with_code', 'code'))
                                         ->searchable()
-                                        ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get): bool => $get('has_different_shipping_address')),
+                                        ->visible(fn (Get $get): bool => $get('has_different_shipping_address')),
                                 ])->columnSpanFull(),
                         ])->columnSpanFull(),
 
                     Section::make('Totals')
                         ->schema([
-                            \Filament\Forms\Components\Hidden::make('tax_rate_igst')->dehydrated(false),
-                            \Filament\Forms\Components\Hidden::make('tax_rate_cgst')->dehydrated(false),
-                            \Filament\Forms\Components\Hidden::make('tax_rate_sgst')->dehydrated(false),
-                            \Filament\Forms\Components\Hidden::make('is_intra_state')->dehydrated(false),
+                            Hidden::make('tax_rate_igst')->dehydrated(false),
+                            Hidden::make('tax_rate_cgst')->dehydrated(false),
+                            Hidden::make('tax_rate_sgst')->dehydrated(false),
+                            Hidden::make('is_intra_state')->dehydrated(false),
 
                             TextInput::make('subtotal')
                                 ->readOnly()->columnSpanFull(),
                             TextInput::make('igst_amount')
-                                ->label(fn(Get $get) => $get('tax_rate_igst') ? 'IGST @ ' . $get('tax_rate_igst') . '%' : 'IGST')
+                                ->label(fn (Get $get) => $get('tax_rate_igst') ? 'IGST @ '.$get('tax_rate_igst').'%' : 'IGST')
                                 ->readOnly()
-                                ->visible(fn(Get $get) => !$get('is_intra_state'))
+                                ->visible(fn (Get $get) => ! $get('is_intra_state'))
                                 ->dehydrated(false)->columnSpanFull(),
                             TextInput::make('cgst_amount')
-                                ->label(fn(Get $get) => $get('tax_rate_cgst') ? 'CGST @ ' . $get('tax_rate_cgst') . '%' : 'CGST')
+                                ->label(fn (Get $get) => $get('tax_rate_cgst') ? 'CGST @ '.$get('tax_rate_cgst').'%' : 'CGST')
                                 ->readOnly()
-                                ->visible(fn(Get $get) => (bool) $get('is_intra_state'))
+                                ->visible(fn (Get $get) => (bool) $get('is_intra_state'))
                                 ->dehydrated(false)->columnSpanFull(),
                             TextInput::make('sgst_amount')
-                                ->label(fn(Get $get) => $get('tax_rate_sgst') ? 'SGST @ ' . $get('tax_rate_sgst') . '%' : 'SGST')
+                                ->label(fn (Get $get) => $get('tax_rate_sgst') ? 'SGST @ '.$get('tax_rate_sgst').'%' : 'SGST')
                                 ->readOnly()
-                                ->visible(fn(Get $get) => (bool) $get('is_intra_state'))
+                                ->visible(fn (Get $get) => (bool) $get('is_intra_state'))
                                 ->dehydrated(false)->columnSpanFull(),
                             TextInput::make('tax_amount')
-                                ->label("Total Tax Amount")
+                                ->label('Total Tax Amount')
                                 ->readOnly()->columnSpanFull(),
                             TextInput::make('round_off')
                                 ->readOnly()
@@ -99,16 +107,16 @@ class InvoiceForm
                             TextInput::make('grand_total')
                                 ->readOnly()
                                 ->columnSpanFull(),
-                        ])->columnSpanFull()
+                        ])->columnSpanFull(),
                 ]),
             Section::make('Items')
                 ->schema([
                     Repeater::make('items')
                         ->relationship()
-                        ->columns(4)
+                        ->columns(5)
                         ->live()
-                        ->afterStateHydrated(fn(Set $set, Get $get) => self::updateTotals($set, $get))
-                        ->afterStateUpdated(fn(Set $set, Get $get) => self::updateTotals($set, $get))
+                        ->afterStateHydrated(fn (Set $set, Get $get) => self::updateTotals($set, $get))
+                        ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get))
                         ->schema([
                             Select::make('product_id')
                                 ->relationship('product', 'description')
@@ -118,10 +126,14 @@ class InvoiceForm
                                     $product = Product::find($state);
                                     if ($product) {
                                         $set('rate', $product->default_rate);
+                                        $set('tax_rate', $product->tax_rate);
                                     }
                                     $qty = (float) $get('quantity') ?: 1;
                                     $rate = (float) $get('rate') ?: 0;
-                                    $set('amount', $qty * $rate);
+                                    $taxRate = (float) $get('tax_rate') ?: 0;
+                                    $amount = $qty * $rate;
+                                    $set('amount', $amount);
+                                    $set('tax_amount', ($amount * $taxRate) / 100);
                                 }),
                             TextInput::make('quantity')
                                 ->numeric()
@@ -131,7 +143,10 @@ class InvoiceForm
                                 ->afterStateUpdated(function (Set $set, Get $get) {
                                     $qty = (float) $get('quantity') ?: 1;
                                     $rate = (float) $get('rate') ?: 0;
-                                    $set('amount', $qty * $rate);
+                                    $taxRate = (float) $get('tax_rate') ?: 0;
+                                    $amount = $qty * $rate;
+                                    $set('amount', $amount);
+                                    $set('tax_amount', ($amount * $taxRate) / 100);
                                 }),
                             TextInput::make('rate')
                                 ->numeric()
@@ -140,17 +155,31 @@ class InvoiceForm
                                 ->afterStateUpdated(function (Set $set, Get $get) {
                                     $qty = (float) $get('quantity') ?: 1;
                                     $rate = (float) $get('rate') ?: 0;
-                                    $set('amount', $qty * $rate);
+                                    $taxRate = (float) $get('tax_rate') ?: 0;
+                                    $amount = $qty * $rate;
+                                    $set('amount', $amount);
+                                    $set('tax_amount', ($amount * $taxRate) / 100);
+                                }),
+                            TextInput::make('tax_rate')
+                                ->numeric()
+                                ->label('Tax %')
+                                ->live()
+                                ->afterStateUpdated(function (Set $set, Get $get) {
+                                    $qty = (float) $get('quantity') ?: 1;
+                                    $rate = (float) $get('rate') ?: 0;
+                                    $taxRate = (float) $get('tax_rate') ?: 0;
+                                    $amount = $qty * $rate;
+                                    $set('tax_amount', ($amount * $taxRate) / 100);
                                 }),
                             TextInput::make('amount')
                                 ->numeric()
                                 ->required()
                                 ->readOnly(),
+                            Hidden::make('tax_amount')
+                                ->dehydrated(true),
                         ]),
-                ])
+                ]),
         ]);
-
-
 
     }
 
@@ -165,7 +194,9 @@ class InvoiceForm
 
         if (is_array($items)) {
             $firstItem = reset($items);
-            if (!empty($firstItem['product_id'])) {
+            if (isset($firstItem['tax_rate']) && is_numeric($firstItem['tax_rate'])) {
+                $taxRateText = (float) $firstItem['tax_rate'];
+            } elseif (! empty($firstItem['product_id'])) {
                 $product = Product::find($firstItem['product_id']);
                 if ($product) {
                     $taxRateText = $product->tax_rate;
@@ -181,11 +212,16 @@ class InvoiceForm
                 if ($clientId) {
                     $client = Client::find($clientId);
                     if ($client) {
-                        $product = Product::find($item['product_id'] ?? null);
-                        if ($product) {
-                            $taxRate = $product->tax_rate;
-                            $taxAmount += ($amount * $taxRate) / 100;
+                        $taxRate = 0;
+                        if (isset($item['tax_rate']) && is_numeric($item['tax_rate'])) {
+                            $taxRate = (float) $item['tax_rate'];
+                        } elseif (! empty($item['product_id'])) {
+                            $product = Product::find($item['product_id']);
+                            if ($product) {
+                                $taxRate = $product->tax_rate;
+                            }
                         }
+                        $taxAmount += ($amount * $taxRate) / 100;
                     }
                 }
             }

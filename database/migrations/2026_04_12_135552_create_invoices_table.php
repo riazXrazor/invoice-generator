@@ -26,6 +26,8 @@ return new class extends Migration
             $table->text('shipping_address')->nullable();
             $table->string('shipping_gstin')->nullable();
             $table->string('shipping_state_code')->nullable();
+            $table->boolean('cc_attach')->default(false);
+            $table->string('cc_phone')->nullable();
             $table->timestamps();
         });
     }

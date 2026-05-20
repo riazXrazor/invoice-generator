@@ -94,7 +94,7 @@
         <tbody>
             <!-- First Block: Company Info & Invoice Info -->
             <tr>
-                <td colspan="7" style="padding: 0; border-bottom: 1px solid #000;">
+                <td colspan="8" style="padding: 0; border-bottom: 1px solid #000;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
                             <td rowspan="2"
@@ -129,7 +129,7 @@
 
             <!-- Second Block: Buyer & Shipping Info -->
             <tr>
-                <td colspan="7" style="padding: 0; border-bottom: 1px solid #000;">
+                <td colspan="8" style="padding: 0; border-bottom: 1px solid #000;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
                             <td
@@ -200,20 +200,21 @@
 
             <!-- Table Headers -->
 
-            <tr>
                 <th style="width:5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
                     SL<br>No</th>
-                <th style="width:34.5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                <th style="width:30.5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
                     Description of Goods
                 </th>
                 <th style="width:10.5%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
                     HSN Code</th>
-                <th style="width:8%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                <th style="width:6%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
                     Unit</th>
-                <th style="width:8%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">Qty
+                <th style="width:6%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">Qty
                 </th>
-                <th style="width:14%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                <th style="width:12%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
                     Rate</th>
+                <th style="width:10%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
+                    Tax %</th>
                 <th style="width:20%; text-align:center; font-weight:normal;font-weight:bold;vertical-align: middle;">
                     Amount</th>
             </tr>
@@ -222,19 +223,12 @@
             @foreach($invoice->items as $index => $item)
                 <tr class="item-data">
                     <td class="text-center">{{ $index + 1 }}.</td>
-                    <td>
-                        {{ strtoupper($item->product->description) }}
-                        @if($index === 0 && $invoice->cc_attach && $invoice->cc_phone)
-                            <div style="margin-top: 40px; text-align: center; font-size: 13px;">
-                                <span style="color: #000000;">(C.C. ATTACH)</span><br>
-                                <span style="color: #ff0000;">{{ $invoice->cc_phone }}</span>
-                            </div>
-                        @endif
-                    </td>
+                    <td>{{ strtoupper($item->product->description) }}</td>
                     <td class="text-center">{{ $item->product->hsn_code }}</td>
                     <td class="text-center">{{ strtoupper($item->product->unit) }}</td>
                     <td class="text-center">{{ (float) $item->quantity }}</td>
                     <td class="text-center">{{ number_format($item->rate, 2) }}</td>
+                    <td class="text-center">{{ (float) $item->tax_rate }}%</td>
                     <td class="text-center">{{ number_format($item->amount, 2) }}</td>
                 </tr>
             @endforeach
@@ -263,6 +257,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
             </tr>
 
             <tr>
@@ -271,8 +266,9 @@
                 <td class="no-border-top no-border-bottom"></td>
                 <td class="no-border-top no-border-bottom"></td>
                 <td class="no-border-top no-border-bottom"></td>
+                <td class="no-border-top no-border-bottom"></td>
                 <td style="border-top: 1px solid #000; border-bottom: none; border-top: none; padding-bottom:5px;">
-                    IGST @ {{ $invoice->items->first()?->tax_rate ?? 0 }}%</td>
+                    IGST</td>
                 <td style="border-top: 1px solid #000; border-bottom: none; text-align:center;">
                     {{ number_format($igst, 2) }}
                 </td>
@@ -284,8 +280,9 @@
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
+                    <td class="no-border-top no-border-bottom"></td>
                     <td style="border-bottom: none; border-top: none; padding-bottom:5px;">
-                        CGST @ {{ ($invoice->items->first()?->tax_rate ?? 0) / 2 }}%</td>
+                        CGST</td>
                     <td style="border-bottom: none; border-top: none; text-align:center;">
                         {{ number_format($cgst, 2) }}
                     </td>
@@ -296,13 +293,15 @@
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
                     <td class="no-border-top no-border-bottom"></td>
+                    <td class="no-border-top no-border-bottom"></td>
                     <td style="border-bottom: none; border-top: none;">
-                        SGST @ {{ ($invoice->items->first()?->tax_rate ?? 0) / 2 }}%</td>
+                        SGST</td>
                     <td style="border-bottom: none; border-top: none; text-align:center;">{{ number_format($sgst, 2) }}</td>
                 </tr>
             @endif
 
             <tr>
+                <td class="no-border-top no-border-bottom"></td>
                 <td class="no-border-top no-border-bottom"></td>
                 <td class="no-border-top no-border-bottom"></td>
                 <td class="no-border-top no-border-bottom"></td>
@@ -323,20 +322,21 @@
                 <th></th>
                 <th></th>
                 <th></th>
+                <th></th>
                 <th class="text-center" style="font-weight: bold;">{{ number_format(round($invoice->grand_total), 2) }}
                 </th>
             </tr>
 
             <!-- Amount In Words -->
             <tr>
-                <td colspan="7" style="padding: 5px;">
+                <td colspan="8" style="padding: 5px;">
                     <strong>Amount (in word) : {{ $invoice->amount_in_words }}.</strong>
                 </td>
             </tr>
 
             <!-- Bank Details and Declaration -->
             <tr>
-                <td colspan="7" style="padding: 10px;padding-bottom: 0;padding-right: 0;">
+                <td colspan="8" style="padding: 10px;padding-bottom: 0;padding-right: 0;">
                     <div style="font-weight: bold;">{{ $company->bank_detail_heading }}</div>
                     <table style="width: 60%; border: none; font-size: 13px; margin-top: 5px;">
                         <tr>

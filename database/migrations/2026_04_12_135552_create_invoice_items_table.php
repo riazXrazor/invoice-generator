@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('quantity', 10, 2);
             $table->decimal('rate', 15, 2);
             $table->decimal('amount', 15, 2);
+            $table->decimal('tax_rate', 5, 2)->default(0);
+            $table->decimal('tax_amount', 15, 2)->default(0);
             $table->timestamps();
         });
     }

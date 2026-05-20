@@ -185,31 +185,25 @@
         <thead>
             <tr>
                 <th style="width:5%;">Sl No.</th>
-                <th style="width:40%;">Description of Goods</th>
+                <th style="width:35%;">Description of Goods</th>
                 <th style="width:10%;">HSN/SAC</th>
-                <th style="width:15%; text-align:center;">Unit</th>
-                <th style="width:15%; text-align:center;">Quantity</th>
-                <th style="width:15%; text-align:center;">Rate</th>
-                <th style="width:15%; text-align:center;">Amount</th>
+                <th style="width:8%; text-align:center;">Unit</th>
+                <th style="width:8%; text-align:center;">Quantity</th>
+                <th style="width:12%; text-align:center;">Rate</th>
+                <th style="width:10%; text-align:center;">Tax %</th>
+                <th style="width:12%; text-align:center;">Amount</th>
             </tr>
         </thead>
         <tbody>
             @foreach($invoice->items as $index => $item)
                 <tr>
                     <td style="text-align:center;">{{ $index + 1 }}</td>
-                    <td>
-                        {{ $item->product->description }}
-                        @if($index === 0 && $invoice->cc_attach && $invoice->cc_phone)
-                            <div style="margin-top: 10px; text-align: center; font-size: 13px;">
-                                <span style="color: #000000;">(C.C. ATTACH)</span><br>
-                                <span style="color: #ff0000;">{{ $invoice->cc_phone }}</span>
-                            </div>
-                        @endif
-                    </td>
+                    <td>{{ $item->product->description }}</td>
                     <td>{{ $item->product->hsn_code }}</td>
                     <td style="text-align:center;">{{ $item->product->unit }}</td>
                     <td style="text-align:center;">{{ (float) $item->quantity }}</td>
                     <td style="text-align:center;">{{ number_format($item->rate, 2) }}</td>
+                    <td style="text-align:center;">{{ (float) $item->tax_rate }}%</td>
                     <td style="text-align:right;">{{ number_format($item->amount, 2) }}</td>
                 </tr>
             @endforeach
@@ -229,38 +223,32 @@
             @endphp
 
             <tr>
-                <td colspan="6" style="text-align:right;"><strong>Total Amount before Tax</strong></td>
+                <td colspan="7" style="text-align:right;"><strong>Total Amount before Tax</strong></td>
                 <td style="text-align:right;"><strong>{{ number_format($invoice->subtotal, 2) }}</strong></td>
             </tr>
 
             <tr>
-                <td colspan="6" style="text-align:right;">Add : IGST @
-                    {{ $invoice->items->first()?->tax_rate ?? 0 }}%
-                </td>
+                <td colspan="7" style="text-align:right;">Add : IGST</td>
                 <td style="text-align:right;">{{ number_format($igst, 2) }}</td>
             </tr>
             @if($isIntraState)
                 <tr>
-                    <td colspan="6" style="text-align:right;">Add : CGST @
-                        {{ ($invoice->items->first()?->tax_rate ?? 0) / 2 }}%
-                    </td>
+                    <td colspan="7" style="text-align:right;">Add : CGST</td>
                     <td style="text-align:right;">{{ number_format($cgst, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="text-align:right;">Add : SGST @
-                        {{ ($invoice->items->first()?->tax_rate ?? 0) / 2 }}%
-                    </td>
+                    <td colspan="7" style="text-align:right;">Add : SGST</td>
                     <td style="text-align:right;">{{ number_format($sgst, 2) }}</td>
                 </tr>
             @endif
 
             <tr>
-                <td colspan="6" style="text-align:right;">Round Off</td>
+                <td colspan="7" style="text-align:right;">Round Off</td>
                 <td style="text-align:right;">{{ number_format($roundOff, 2) }}</td>
             </tr>
 
             <tr>
-                <td colspan="6" style="text-align:right;"><strong>Grand Total (Rounded)</strong></td>
+                <td colspan="7" style="text-align:right;"><strong>Grand Total (Rounded)</strong></td>
                 <td style="text-align:right;"><strong>{{ number_format($grandTotalRounded, 2) }}</strong></td>
             </tr>
         </tbody>

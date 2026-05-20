@@ -10,11 +10,12 @@ class Invoice extends Model
         'client_id', 'invoice_no', 'invoice_date', 'challan_no',
         'dispatched_through', 'subtotal', 'tax_amount', 'grand_total',
         'has_different_shipping_address', 'shipping_name', 'shipping_address',
-        'shipping_gstin', 'shipping_state_code',
+        'shipping_gstin', 'shipping_state_code', 'cc_attach', 'cc_phone',
     ];
 
     protected $casts = [
         'invoice_date' => 'date',
+        'cc_attach' => 'boolean',
     ];
 
     public function client()
