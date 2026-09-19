@@ -36,6 +36,7 @@ class InvoiceForm
                                     ->required()
                                     ->searchable()
                                     ->live()
+                                    ->preload()
                                     ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get)),
                                 TextInput::make('invoice_no')
                                     ->default(fn () => CompanyDetail::first()->invoice_prefix.'/'.str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT).'/'.((date('y')).'-'.(date('y') + 1)))
@@ -124,6 +125,7 @@ class InvoiceForm
                                 ->required()
                                 ->searchable()
                                 ->live()
+                                ->preload()
                                 ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                     $product = Product::find($state);
                                     if ($product) {
@@ -136,7 +138,7 @@ class InvoiceForm
                                     $amount = $qty * $rate;
                                     $set('amount', $amount);
                                     $set('tax_amount', ($amount * $taxRate) / 100);
-                                }),
+                                })->columnSpanFull(),
                             TextInput::make('quantity')
                                 ->numeric()
                                 ->default(1)
@@ -176,7 +178,8 @@ class InvoiceForm
                             TextInput::make('amount')
                                 ->numeric()
                                 ->required()
-                                ->readOnly(),
+                                ->readOnly()
+                                ->columnSpan(2),
                             Hidden::make('tax_amount')
                                 ->dehydrated(true),
                         ]),
