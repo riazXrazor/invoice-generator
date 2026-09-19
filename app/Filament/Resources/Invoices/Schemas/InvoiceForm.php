@@ -34,6 +34,7 @@ class InvoiceForm
                                 Select::make('client_id')
                                     ->relationship('client', 'name')
                                     ->required()
+                                    ->searchable()
                                     ->live()
                                     ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get)),
                                 TextInput::make('invoice_no')
@@ -50,7 +51,7 @@ class InvoiceForm
                                     ->live()->columnSpanFull(),
                                 TextInput::make('cc_phone')
                                     ->label('Phone Number')
-                                    ->visible(fn (Get $get): bool => (bool) $get('cc_attach'))
+                                    ->visible(fn (Get $get): bool => (bool) $get('cc_attach')),
                             ]),
                             Section::make('Shipping Details')
                                 ->schema([
@@ -121,6 +122,7 @@ class InvoiceForm
                             Select::make('product_id')
                                 ->relationship('product', 'description')
                                 ->required()
+                                ->searchable()
                                 ->live()
                                 ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                     $product = Product::find($state);
