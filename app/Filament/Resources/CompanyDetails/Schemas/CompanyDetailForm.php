@@ -55,8 +55,7 @@ class CompanyDetailForm
                     ->required()
                     ->default('SUBJECT TO BARUIPUR JURISDICTION'),
                 TextInput::make('invoice_prefix')
-                    ->required()
-                    ->default('UFP'),
+                    ->nullable(),
                 Select::make('invoice_template')
                     ->label('Invoice Template')
                     ->options([

@@ -39,7 +39,12 @@ class InvoiceForm
                                     ->preload()
                                     ->afterStateUpdated(fn (Set $set, Get $get) => self::updateTotals($set, $get)),
                                 TextInput::make('invoice_no')
-                                    ->default(fn () => CompanyDetail::first()->invoice_prefix.'/'.str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT).'/'.((date('y')).'-'.(date('y') + 1)))
+                                    ->default(function () {
+                                        $prefix = CompanyDetail::first()?->invoice_prefix;
+                                        $prefixPart = ! empty($prefix) ? $prefix.'/' : '';
+
+                                        return $prefixPart.str_pad(Invoice::count() + 1, 3, '0', STR_PAD_LEFT).'/'.((date('y')).'-'.(date('y') + 1));
+                                    })
                                     ->required()
                                     ->unique(ignoreRecord: true),
                                 DatePicker::make('invoice_date')
